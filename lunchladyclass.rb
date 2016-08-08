@@ -31,9 +31,6 @@ class Food
 		puts "Calories: #{@@total_calories}"
 		puts '-----------------'
 	end
-
-
-
 end
 
 @entrees = [
@@ -182,10 +179,14 @@ def options(user_input, menu)
 				menu_selection(menu)
 			when /rem.*/
 				@entrees[0].order_details
+				if @customer_order.count == 0
+					puts 'No items to remove'
+					menu_selection(menu)
+				end
 				puts 'Which item would you like to remove?'
 				item_number = 1
-				@customer_order.each do |item|
-					puts "#{item_number}. #{item.name}. . .\$#{item.price}"
+				@customer_order.each do |option|
+					puts "#{item_number}. #{option.name}. . .\$#{option.price}"
 					item_number += 1
 				end
 				item = gets.strip
@@ -193,9 +194,20 @@ def options(user_input, menu)
 					puts 'Not a valid menu choice, please choose a number'
 					options('rem', menu)
 				else
-					puts "#{@customer_order[item.to_i - 1].name} removed."
-					@customer_order.delete_at(item.to_i - 1)
-					@entrees[0].user_remove
+					remove = @customer_order[item.to_i - 1].name.downcase.gsub(/\s+/, "").to_s
+					puts remove
+					if @entrees.any? { |ob| ob.name.downcase.gsub(/\s+/, "").include?(remove) }
+						num = @entrees.find_index { |ob| ob.name.downcase.gsub(/\s+/, "").include?(remove) }
+						@entrees[num].user_remove
+						@customer_order.delete_at(item.to_i - 1)
+					else
+						num = @sides.find_index { |ob| ob.name.downcase.gsub(/\s+/, "").include?(remove) }
+						@sides[num].user_remove
+						@customer_order.delete_at(item.to_i - 1)
+					end
+					# puts "#{@customer_order[item.to_i - 1].name} removed."
+					# @customer_order.delete_at(item.to_i - 1)
+					# @entrees[0].user_remove
 					menu_selection(menu)
 				end
 
